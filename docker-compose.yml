@@ -1,0 +1,38 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  streamlit_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: streamlit_app
+    depends_on:
+      - qdrant
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./docs:/app/docs
+    environment:
+      - PYTHONUNBUFFERED=1
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - OLLAMA_HOST=ollama
+      - OLLAMA_PORT=11434
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    depends_on:
+      - qdrant
+    volumes:
+      - ollama_data:/data
+
+volumes:
+  qdrant_data:
+  ollama_data:

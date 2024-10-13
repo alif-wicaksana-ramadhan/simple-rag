@@ -1,0 +1,9 @@
+haystack-ai
+qdrant-haystack
+ollama-haystack
+transformers
+sentence-transformers>=3.0.0
+streamlit
+pypdf
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==2.3.1+cu121
