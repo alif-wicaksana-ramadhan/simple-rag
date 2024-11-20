@@ -28,7 +28,7 @@ if "pipeline_csv_store" not in st.session_state:
     pipeline_csv_store = Pipeline()
     pipeline_csv_store.add_component("embedder", SentenceTransformersDocumentEmbedder())
     pipeline_csv_store.add_component(
-        "writer", DocumentWriter(document_store=document_store)
+        "writer", DocumentWriter(document_store=st.session_state.document_store)
     )
     # pipeline_csv_store.connect("converter.documents", "embedder")
     pipeline_csv_store.connect("embedder", "writer")
@@ -40,7 +40,7 @@ if "pipeline_pdf_store" not in st.session_state:
     pipeline_pdf_store.add_component("cleaner", DocumentCleaner())
     pipeline_pdf_store.add_component("embedder", SentenceTransformersDocumentEmbedder())
     pipeline_pdf_store.add_component(
-        "writer", DocumentWriter(document_store=document_store)
+        "writer", DocumentWriter(document_store=st.session_state.document_store)
     )
     pipeline_pdf_store.connect("converter", "cleaner")
     pipeline_pdf_store.connect("cleaner", "embedder")
@@ -61,7 +61,8 @@ if "pipeline_retrieve" not in st.session_state:
     pipeline_retrieve = Pipeline()
     pipeline_retrieve.add_component("embedder", SentenceTransformersTextEmbedder())
     pipeline_retrieve.add_component(
-        "retriever", QdrantEmbeddingRetriever(document_store=document_store)
+        "retriever",
+        QdrantEmbeddingRetriever(document_store=st.session_state.document_store),
     )
     pipeline_retrieve.add_component("builder", PromptBuilder(template=template))
     ollama_host = os.getenv("OLLAMA_HOST", "127.0.0.1")
@@ -69,12 +70,12 @@ if "pipeline_retrieve" not in st.session_state:
     pipeline_retrieve.add_component(
         "generator",
         OllamaGenerator(
-            model="llama3.2",
+            model="llama3.1",
             url=f"http://{ollama_host}:{ollama_port}",
         ),
     )
-    pipeline_retrieve.connect("embedder", "retriever.query_embedding")
-    pipeline_retrieve.connect("retriever", "builder.documents")
+    pipeline_retrieve.connect("embedder", "retriever")
+    pipeline_retrieve.connect("retriever", "builder")
     pipeline_retrieve.connect("builder", "generator")
     st.session_state.pipeline_retrieve = pipeline_retrieve
 
